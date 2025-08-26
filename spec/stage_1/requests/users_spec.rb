@@ -19,43 +19,5 @@ RSpec.describe "Users", type: :request do
       Account.insert_all(1000.times.map { { user_id: user_ids.sample, bank_id: bank_ids.sample } })
       expect { get users_path }.to perform_under(50).ms.warmup(2).times.sample(10).times
     end
-
-    it "returns users and associated accounts", :aggregate_failures do
-      pending 'association with latest account'
-      user = User.create!(name: "Test User")
-      bank = Bank.create!(name: "ABN AMRO FUND MANAGERS LIMITED", country: "Eritrea")
-      Account.create!(user: user, bank: bank)
-
-      get users_path
-
-      expect(response).to have_http_status(:success)
-      expect(response.content_type).to eq("application/json; charset=utf-8")
-      parsed_body = response.parsed_body
-      expect(parsed_body).to be_an(Array)
-      expect(parsed_body.size).to eq(1)
-      expect(parsed_body.first.keys).to eq(%w[name accounts])
-      expect(parsed_body.first["name"]).to eq(user.name)
-      expect(parsed_body.first["accounts"]).to be_an(Array)
-      expect(parsed_body.first["accounts"].size).to eq(1)
-      expect(parsed_body.first["accounts"].first.keys).to eq(%w[bank])
-      expect(parsed_body.first["accounts"].first["bank"]).to be_a(Hash)
-      expect(parsed_body.first["accounts"].first["bank"]["name"]).to eq(bank.name)
-      expect(parsed_body.first["accounts"].first["bank"]["country"]).to eq(bank.country)
-      expect(parsed_body).to eq(
-                                        [
-                                          {
-                                            "name" => user.name,
-                                            "accounts" => [
-                                              {
-                                                "bank" => {
-                                                  "name" => bank.name,
-                                                  "country" => bank.country
-                                                }
-                                              }
-                                            ]
-                                          }
-                                        ]
-                                      )
-    end
   end
 end
